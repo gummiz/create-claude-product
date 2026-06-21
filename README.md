@@ -60,11 +60,23 @@ fills the docs, records a stack, and seeds your first spec, then removes its own
 
 | Piece | Role |
 |---|---|
-| `install.sh` | Symlinks `new-project` onto your PATH so it runs from any directory. |
+| `install.sh` / `uninstall.sh` | Add or remove the `new-project` symlink on your PATH. |
 | `bin/new-project` | Deterministic launcher: copy `template/` → child, git init, inject the interview skill, launch Claude. Resolves its own location through symlinks, so the PATH install works. |
 | `template/` | The payload — a copy of the Claude Code product template. Only its contents reach a generated project. |
 | `.claude/skills/project-bootstrap/` | The interview skill, injected transiently into each new project and removed when bootstrap completes. |
 | `tests/` | Launcher smoke test. |
+
+## Uninstall
+
+```bash
+cd create-claude-product
+./uninstall.sh            # removes the `new-project` symlink from ~/.local/bin
+PREFIX=/usr/local/bin ./uninstall.sh   # if you installed with a custom PREFIX
+```
+
+This only removes the launcher symlink. It does **not** touch this repo, any projects you created,
+or a PATH line you may have added to `~/.zshrc`. To remove the tool entirely, also delete the cloned
+repo folder. Uninstalling does nothing to projects already generated — they're independent git repos.
 
 ## Design
 
