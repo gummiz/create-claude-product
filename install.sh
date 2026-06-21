@@ -52,3 +52,9 @@ case ":$PATH:" in
     echo "  (Until PATH is fixed, run it by full path: $BIN_SRC my-app)"
     ;;
 esac
+
+# Optional: nudge toward gum for a nicer model picker (only when it's missing).
+if ! command -v gum >/dev/null 2>&1; then
+  echo
+  echo "  Tip: install \`gum\` (brew install gum) for an arrow-key model picker."
+fi
