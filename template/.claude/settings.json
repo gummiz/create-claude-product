@@ -24,9 +24,10 @@
       "Bash(git reset:*)",
       "Bash(rm:*)",
       "Bash(mv:*)",
-      "WebFetch(**)",
-      "WebSearch(**)"
+      "WebFetch",
+      "WebSearch"
     ],
+    "_comment_deny": "Note: curl|sh and other remote-exec pipes can't be expressed as permission rules (mid-command pipes aren't matchable); the pretool-block-dangerous-bash.sh hook handles those.",
     "deny": [
       "Read(**/.env)",
       "Read(**/.env.*)",
@@ -36,9 +37,7 @@
       "Read(**/*.key)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
-      "Bash(rm -rf /*)",
-      "Bash(curl:* | sh)",
-      "Bash(curl:* | bash)"
+      "Bash(rm -rf /*)"
     ]
   },
 

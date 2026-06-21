@@ -42,6 +42,11 @@ assert "no tool bin leaked"           '[ ! -e "$CHILD/bin/new-project" ]'
 assert "no tool docs leaked"          '[ ! -e "$CHILD/docs/superpowers" ]'
 assert "bootstrap gitignored"         '[ "$(grep -c project-bootstrap "$CHILD/.gitignore")" -ge 1 ]'
 
+# --- generated settings.json must be valid + free of malformed permission rules ---
+assert "settings.json valid JSON"     'python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$CHILD/.claude/settings.json"'
+assert "no WebFetch/WebSearch wildcard" '! grep -Eq "WebFetch\(\*\*\)|WebSearch\(\*\*\)" "$CHILD/.claude/settings.json"'
+assert "no unmatchable curl-pipe rule"  '! grep -q "curl:\* |" "$CHILD/.claude/settings.json"'
+
 # --- symlinked invocation from an unrelated cwd (global-install path) ---
 LINKDIR="$TMP/bin"; mkdir -p "$LINKDIR"
 ln -s "$BIN" "$LINKDIR/new-project"
