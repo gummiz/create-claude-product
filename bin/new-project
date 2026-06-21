@@ -8,7 +8,15 @@ set -euo pipefail
 # Deterministic steps only (no judgment). See the design spec:
 #   docs/superpowers/specs/2026-06-21-new-project-bootstrapper-design.md
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve this script's real location, following symlinks (so a `new-project`
+# symlink placed on PATH still finds the repo's template/ and skill).
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [ "${SOURCE#/}" = "$SOURCE" ] && SOURCE="$DIR/$SOURCE"  # relative symlink
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATE_DIR="$ROOT_DIR/template"
 SKILL_SRC="$ROOT_DIR/.claude/skills/project-bootstrap"

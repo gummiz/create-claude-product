@@ -42,4 +42,11 @@ assert "no tool bin leaked"           '[ ! -e "$CHILD/bin/new-project" ]'
 assert "no tool docs leaked"          '[ ! -e "$CHILD/docs/superpowers" ]'
 assert "bootstrap gitignored"         '[ "$(grep -c project-bootstrap "$CHILD/.gitignore")" -ge 1 ]'
 
+# --- symlinked invocation from an unrelated cwd (global-install path) ---
+LINKDIR="$TMP/bin"; mkdir -p "$LINKDIR"
+ln -s "$BIN" "$LINKDIR/new-project"
+( cd "$TMP" && "$LINKDIR/new-project" linked --dir "$TMP" --no-launch >/dev/null 2>&1 )
+assert "symlinked launcher scaffolds"   '[ -f "$TMP/linked/CLAUDE.md" ]'
+assert "symlinked launcher copies payload" '[ -f "$TMP/linked/scripts/verify.sh" ]'
+
 exit $fail
