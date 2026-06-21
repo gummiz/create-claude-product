@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# new-project — scaffold a new product from the template, then launch the bootstrap interview.
+#
+# Usage:  new-project <name> [--dir <parent>]
+#
+# Deterministic steps only (no judgment). See the design spec for the full contract:
+#   docs/superpowers/specs/2026-06-21-new-project-bootstrapper-design.md
+#
+# Planned steps:
+#   1. Resolve target path (<parent>/<name>, default parent = cwd). Abort if it exists.
+#   2. Locate this tool's template/ payload (relative to this script). Abort if missing.
+#   3. cp -R template/ -> target.
+#   4. git init + initial commit.
+#   5. chmod +x target/scripts/*.sh target/.claude/hooks/*.sh.
+#   6. cp settings.local.example.json -> settings.local.json.
+#   7. Inject transient .claude/skills/project-bootstrap/ into the child.
+#   8. Write sentinel .bootstrap/state.json (phase 1).
+#   9. exec claude in the child with the bootstrap-trigger prompt (degrade gracefully if absent).
+#
+# STATUS: skeleton — implementation pending (see plan).
+
+echo "new-project: not yet implemented (skeleton)." >&2
+echo "See docs/superpowers/specs/2026-06-21-new-project-bootstrapper-design.md" >&2
+exit 1

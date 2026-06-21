@@ -1,0 +1,12 @@
+{
+  "_comment": "Copy to settings.local.json (gitignored) for machine/session overrides. Strict JSON. Merges over settings.json. Use this to widen permissions for a focused-autonomous session WITHOUT committing the looser rules. Revert by deleting the file.",
+
+  "_comment_example": "Example: during a scoped, sandboxed task you trust, promote a few asks to allow. Keep deny intact. TODO: replace with the specific commands your task needs.",
+  "permissions": {
+    "allow": [
+      "Bash(npm test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

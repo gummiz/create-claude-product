@@ -1,0 +1,17 @@
+# Machine-local / generated
+.DS_Store
+*.log
+
+# Local Claude config + overrides (never committed)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Bootstrap state (only exists inside generated children mid-bootstrap)
+.bootstrap/
+
+# Common ecosystem noise
+node_modules/
+dist/
+build/
+__pycache__/
+.venv/

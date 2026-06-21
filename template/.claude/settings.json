@@ -1,0 +1,79 @@
+{
+  "_comment": "Project Claude Code config. STRICT JSON — no // comments; use _comment keys. Conservative by default. TODO: tune permissions and hook matchers for your stack. Machine-specific overrides go in settings.local.json (gitignored).",
+
+  "_comment_permissions": "allow = run without asking; ask = prompt every time; deny = never (deny wins over allow). Start tight and widen as you trust a workflow. These patterns are examples — adjust to your tooling.",
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(./scripts/verify.sh)",
+      "Bash(./scripts/lint-changed.sh)",
+      "Bash(./scripts/test-changed.sh)",
+      "Bash(./scripts/review-diff.sh)"
+    ],
+    "ask": [
+      "Write(**)",
+      "Edit(**)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "WebFetch(**)",
+      "WebSearch(**)"
+    ],
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/secrets/**)",
+      "Read(**/*.pem)",
+      "Read(**/id_rsa)",
+      "Read(**/*.key)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(rm -rf /*)",
+      "Bash(curl:* | sh)",
+      "Bash(curl:* | bash)"
+    ]
+  },
+
+  "_comment_hooks": "Deterministic guardrails. Paths are relative to the project root. Keep these fast and fail-safe (see docs/workflows/hook-policy.md). TODO: confirm matchers fit the tools you actually use.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": ".claude/hooks/pretool-block-dangerous-bash.sh" }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": ".claude/hooks/pretool-protect-sensitive-paths.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": ".claude/hooks/posttool-format-changed.sh" },
+          { "type": "command", "command": ".claude/hooks/posttool-lint-changed.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": ".claude/hooks/stop-verify.sh" }
+        ]
+      }
+    ]
+  }
+}
