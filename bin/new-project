@@ -3,24 +3,92 @@ set -euo pipefail
 
 # new-project — scaffold a new product from the template, then launch the bootstrap interview.
 #
-# Usage:  new-project <name> [--dir <parent>]
+# Usage:  new-project <name> [--dir <parent>] [--no-launch]
 #
-# Deterministic steps only (no judgment). See the design spec for the full contract:
+# Deterministic steps only (no judgment). See the design spec:
 #   docs/superpowers/specs/2026-06-21-new-project-bootstrapper-design.md
-#
-# Planned steps:
-#   1. Resolve target path (<parent>/<name>, default parent = cwd). Abort if it exists.
-#   2. Locate this tool's template/ payload (relative to this script). Abort if missing.
-#   3. cp -R template/ -> target.
-#   4. git init + initial commit.
-#   5. chmod +x target/scripts/*.sh target/.claude/hooks/*.sh.
-#   6. cp settings.local.example.json -> settings.local.json.
-#   7. Inject transient .claude/skills/project-bootstrap/ into the child.
-#   8. Write sentinel .bootstrap/state.json (phase 1).
-#   9. exec claude in the child with the bootstrap-trigger prompt (degrade gracefully if absent).
-#
-# STATUS: skeleton — implementation pending (see plan).
 
-echo "new-project: not yet implemented (skeleton)." >&2
-echo "See docs/superpowers/specs/2026-06-21-new-project-bootstrapper-design.md" >&2
-exit 1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TEMPLATE_DIR="$ROOT_DIR/template"
+SKILL_SRC="$ROOT_DIR/.claude/skills/project-bootstrap"
+
+usage() {
+  cat >&2 <<'EOF'
+Usage: new-project <name> [--dir <parent>] [--no-launch]
+
+  <name>          Name (and directory) of the new project.
+  --dir <parent>  Parent directory to create it in (default: current dir).
+  --no-launch     Scaffold only; do not launch Claude.
+EOF
+}
+die() { echo "new-project: $*" >&2; exit 1; }
+
+# --- parse args ---
+NAME=""
+PARENT="$PWD"
+LAUNCH=1
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dir) shift; [ $# -gt 0 ] || { usage; exit 2; }; PARENT="$1" ;;
+    --no-launch) LAUNCH=0 ;;
+    -h|--help) usage; exit 0 ;;
+    -*) usage; exit 2 ;;
+    *) [ -z "$NAME" ] || { usage; exit 2; }; NAME="$1" ;;
+  esac
+  shift
+done
+[ -n "$NAME" ] || { usage; exit 2; }
+
+[ -d "$TEMPLATE_DIR" ] || die "template payload not found at $TEMPLATE_DIR"
+
+TARGET="$PARENT/$NAME"
+[ -e "$TARGET" ] && die "target already exists: $TARGET"
+
+# 1. copy payload
+mkdir -p "$TARGET"
+cp -R "$TEMPLATE_DIR"/. "$TARGET"/
+
+# 2. make scripts + hooks executable
+chmod +x "$TARGET"/scripts/*.sh 2>/dev/null || true
+chmod +x "$TARGET"/.claude/hooks/*.sh 2>/dev/null || true
+
+# 3. git init + initial commit (pristine template)
+git -C "$TARGET" init -q
+git -C "$TARGET" add -A
+git -C "$TARGET" \
+  -c user.name="${GIT_AUTHOR_NAME:-$(git config user.name 2>/dev/null || echo create-claude-product)}" \
+  -c user.email="${GIT_AUTHOR_EMAIL:-$(git config user.email 2>/dev/null || echo noreply@example.com)}" \
+  commit -qm "chore: scaffold from template"
+
+# 4. seed local settings from the example
+if [ -f "$TARGET/.claude/settings.local.example.json" ]; then
+  cp "$TARGET/.claude/settings.local.example.json" "$TARGET/.claude/settings.local.json"
+fi
+
+# 5. inject the transient bootstrap skill
+[ -d "$SKILL_SRC" ] || die "bootstrap skill not found at $SKILL_SRC"
+mkdir -p "$TARGET/.claude/skills/project-bootstrap"
+cp -R "$SKILL_SRC"/. "$TARGET/.claude/skills/project-bootstrap"/
+
+# 6. write the sentinel
+mkdir -p "$TARGET/.bootstrap"
+created="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+cat > "$TARGET/.bootstrap/state.json" <<EOF
+{
+  "phase": 1,
+  "name": "$NAME",
+  "created": "$created"
+}
+EOF
+
+# 7. launch the interview, or hand off
+PROMPT="A new project was just scaffolded from the template. A .bootstrap/state.json sentinel is present — run the project-bootstrap interview to take it from here."
+
+if [ "$LAUNCH" -eq 1 ] && command -v claude >/dev/null 2>&1; then
+  cd "$TARGET"
+  exec claude "$PROMPT"
+fi
+
+echo "Scaffolded $TARGET"
+echo "Next: cd \"$TARGET\" && claude \"$PROMPT\""

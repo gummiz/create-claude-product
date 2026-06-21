@@ -1,0 +1,11 @@
+# Machine-local Claude config + overrides (never committed)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Transient bootstrap machinery (present only during new-project bootstrap)
+.bootstrap/
+.claude/skills/project-bootstrap/
+
+# OS / editor noise
+.DS_Store
+*.log
