@@ -14,8 +14,10 @@ bin/new-project my-app            # scaffold ../my-app, then launch the bootstra
 bin/new-project my-app --dir ~/Code
 ```
 
-> Status: under construction. See the design spec in
-> [`docs/superpowers/specs/`](docs/superpowers/specs/) and the implementation plan.
+The launcher copies `template/` into the new directory, runs `git init` with a pristine commit,
+makes scripts/hooks executable, seeds local settings, injects the transient interview skill, writes
+the `.bootstrap/state.json` sentinel, and launches Claude into the bootstrap interview. Use
+`--no-launch` to scaffold without launching.
 
 ## How it works
 
