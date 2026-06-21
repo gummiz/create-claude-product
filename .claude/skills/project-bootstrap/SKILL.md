@@ -13,6 +13,20 @@ ready-to-implement first feature. Phased, checkpointed, resumable via `.bootstra
 1. Read `.bootstrap/state.json`. If absent, this skill does not apply — stop.
 2. Resume at the recorded `phase`. Never re-run a completed phase.
 3. Reuse the project's own skills where noted; do not duplicate their logic here.
+4. **Open warmly before the first question.** Greet by project name and restate the plan in one
+   line — e.g. "Setting up *<name>*. I'll ask a few questions across three short phases (product →
+   stack → first spec), committing as we go. Stop whenever you like. First up:" — then ask Phase 1's
+   first question. On a resume (phase > 1), instead say one line about where we're picking up.
+   Keep it to a sentence; the launcher already showed the overview.
+
+## How to ask
+
+- **Use the `AskUserQuestion` tool for any question with a small set of discrete options** —
+  target user, stack choice, scaffold depth, the first feature, yes/no forks. It renders a
+  selectable list, which is far nicer than plain text and keeps answers structured. Mark the
+  recommended option and let the user pick "Other" for anything bespoke.
+- **Use plain text** only for genuinely open-ended questions (the one-line pitch, naming a concept).
+- One question (or one `AskUserQuestion` batch) at a time. Don't stack unrelated asks.
 
 ## Phase 1 · Product  (writes docs/product/*)
 

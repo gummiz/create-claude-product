@@ -23,10 +23,12 @@ SKILL_SRC="$ROOT_DIR/.claude/skills/project-bootstrap"
 
 usage() {
   cat >&2 <<'EOF'
-Usage: new-project <name> [--dir <parent>] [--no-launch]
+Usage: new-project <name> [--dir <parent>] [--model <name>] [--no-launch]
 
   <name>          Name (and directory) of the new project.
   --dir <parent>  Parent directory to create it in (default: current dir).
+  --model <name>  Model to launch Claude with (e.g. opus, sonnet). Skips the
+                  model picker. Omit to be asked interactively.
   --no-launch     Scaffold only; do not launch Claude.
 EOF
 }
@@ -36,9 +38,11 @@ die() { echo "new-project: $*" >&2; exit 1; }
 NAME=""
 PARENT="$PWD"
 LAUNCH=1
+MODEL=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --dir) shift; [ $# -gt 0 ] || { usage; exit 2; }; PARENT="$1" ;;
+    --model) shift; [ $# -gt 0 ] || { usage; exit 2; }; MODEL="$1" ;;
     --no-launch) LAUNCH=0 ;;
     -h|--help) usage; exit 0 ;;
     -*) usage; exit 2 ;;
@@ -95,6 +99,65 @@ PROMPT="A new project was just scaffolded from the template. A .bootstrap/state.
 
 if [ "$LAUNCH" -eq 1 ] && command -v claude >/dev/null 2>&1; then
   cd "$TARGET"
+
+  # Colors — only when writing to a real terminal and NO_COLOR is unset.
+  if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    B=$'\033[1m'; D=$'\033[2m'; C=$'\033[36m'; G=$'\033[32m'; R=$'\033[0m'
+  else
+    B=""; D=""; C=""; G=""; R=""
+  fi
+
+  # Orientation — tell the user what's about to happen before Claude takes over.
+  cat <<EOF
+
+  ${G}✓${R} ${B}Scaffolded${R} ${D}$TARGET${R}
+
+  ${B}Claude will guide you through setup, one question at a time:${R}
+
+      ${C}1${R}  Product               ${D}what you're building, for whom, the constraints${R}
+      ${C}2${R}  Architecture & stack  ${D}pick your tech; get a runnable skeleton${R}
+      ${C}3${R}  First spec            ${D}seed your first feature, ready to implement${R}
+
+  ${D}Commits after each step — stop anytime, resume with 'claude' in this folder.${R}
+EOF
+
+  # Model picker — interactive only; honor an explicit --model and skip if piped.
+  if [ -z "$MODEL" ] && [ -t 0 ]; then
+    if command -v gum >/dev/null 2>&1; then
+      pick="$(gum choose --header "Which model should run the interview?" \
+        "Opus    — most capable, best for design decisions (recommended)" \
+        "Sonnet  — faster and lighter" \
+        "Default — your Claude Code default")" || pick="Opus"
+      case "$pick" in
+        Sonnet*)  MODEL="sonnet" ;;
+        Default*) MODEL="" ;;
+        *)        MODEL="opus" ;;
+      esac
+    else
+      cat <<EOF
+
+  ${B}Which model should run the interview?${R}
+
+      ${C}1${R}  Opus     ${D}most capable, best for design decisions  (recommended)${R}
+      ${C}2${R}  Sonnet   ${D}faster and lighter${R}
+      ${C}3${R}  Default  ${D}your Claude Code default${R}
+EOF
+      printf "\n  ${B}Choice [1]:${R} "
+      read -r reply || reply=""
+      case "$reply" in
+        2) MODEL="sonnet" ;;
+        3) MODEL="" ;;
+        *) MODEL="opus" ;;
+      esac
+    fi
+  fi
+
+  echo
+  if [ -n "$MODEL" ]; then
+    echo "  ${D}Launching Claude (model: $MODEL)…${R}"
+    exec claude --model "$MODEL" "$PROMPT"
+  fi
+  echo "  ${D}Launching Claude…${R}"
   exec claude "$PROMPT"
 fi
 

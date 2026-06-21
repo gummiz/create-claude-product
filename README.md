@@ -37,8 +37,13 @@ Prefer not to install? Skip this step and call the launcher by its full path ins
 ```bash
 new-project my-app                # creates ./my-app here, then launches the interview
 new-project my-app --dir ~/Code   # create it under ~/Code instead
+new-project my-app --model sonnet # launch with a specific model (skips the picker)
 new-project my-app --no-launch    # scaffold only; don't launch Claude
 ```
+
+Just before Claude opens, the launcher shows a short overview of what's about to happen (the three
+interview phases) and asks **which model** to run the interview with — Opus (recommended), Sonnet,
+or your Claude Code default. Pass `--model <name>` to skip that prompt.
 
 The new project is created as a sibling folder in your current directory (like `git clone`), **not**
 inside the tool repo. `new-project` copies `template/` into it, runs `git init` with a pristine
