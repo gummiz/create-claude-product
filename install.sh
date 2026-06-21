@@ -15,19 +15,40 @@ mkdir -p "$TARGET_DIR"
 ln -sf "$BIN_SRC" "$TARGET_DIR/new-project"
 echo "Linked: $TARGET_DIR/new-project -> $BIN_SRC"
 
+print_guide() {
+  cat <<'EOF'
+
+  +------------------------------------------------------------+
+  |   new-project <name>   ->   ./<name>  +  guided setup       |
+  +------------------------------------------------------------+
+
+  How to use it:
+
+    new-project my-app
+        |
+        +--  creates ./my-app in whatever folder you're in
+        +--  git init + a first commit
+        +--  launches the interview:  product docs -> stack -> first spec
+
+  Tips:
+    new-project my-app --dir ~/Code   # create it somewhere specific
+    new-project my-app --no-launch    # just scaffold, skip the interview
+EOF
+}
+
 case ":$PATH:" in
   *":$TARGET_DIR:"*)
     echo
-    echo "Ready. From any directory, run:"
-    echo "    new-project my-app"
+    echo "Ready! From any directory, run:  new-project <name>"
+    print_guide
     ;;
   *)
     echo
-    echo "NOTE: $TARGET_DIR is not on your PATH yet. Add this line to ~/.zshrc:"
+    echo "Almost there -- $TARGET_DIR is not on your PATH yet. Add this to ~/.zshrc:"
     echo "    export PATH=\"$TARGET_DIR:\$PATH\""
     echo "then restart your shell (or run: source ~/.zshrc)."
+    print_guide
     echo
-    echo "Until then you can run it directly:"
-    echo "    $BIN_SRC my-app"
+    echo "  (Until PATH is fixed, run it by full path: $BIN_SRC my-app)"
     ;;
 esac
