@@ -15,17 +15,36 @@ ready-to-implement first feature. Phased, checkpointed, resumable via `.bootstra
 3. Reuse the project's own skills where noted; do not duplicate their logic here.
 4. **Open warmly before the first question.** Greet by project name and restate the plan in one
    line — e.g. "Setting up *<name>*. I'll ask a few questions across three short phases (product →
-   stack → first spec), committing as we go. Stop whenever you like. First up:" — then ask Phase 1's
-   first question. On a resume (phase > 1), instead say one line about where we're picking up.
-   Keep it to a sentence; the launcher already showed the overview.
+   stack → first spec), committing as we go. Stop whenever you like." On a resume (phase > 1),
+   instead say one line about where we're picking up. Keep it to a sentence.
+5. **Pick a guidance mode (first launch only).** If `state.json` has no `mode`, ask it now with
+   `AskUserQuestion` (see "Guidance modes" below), then write the choice into `state.json`. On
+   resume, read `mode` and keep using it — don't ask again.
+
+## Guidance modes
+
+The mode controls how much I decide vs. ask. Default the recommended option to **Guide me**.
+
+| Mode | Behaviour during the interview |
+|---|---|
+| **Fast-track** | I pick sensible defaults and only stop at genuinely consequential forks. I reason a bit harder to choose well, present batched choices already pre-selected, and you confirm or tweak. Fewest interruptions. |
+| **Guide me** (recommended) | Every question is an `AskUserQuestion` with options and a clearly-marked recommendation plus a one-line "why". You decide each one, but never from a blank page. |
+| **Manual** | I still offer options, but with no strong steer — you drive every call. Most control. |
+
+Record it as `state.json.mode` ∈ `fast-track | guide | manual`. If the user picked a thinking-heavy
+mode, lean on extended reasoning to make the default choices defensible.
 
 ## How to ask
 
-- **Use the `AskUserQuestion` tool for any question with a small set of discrete options** —
-  target user, stack choice, scaffold depth, the first feature, yes/no forks. It renders a
-  selectable list, which is far nicer than plain text and keeps answers structured. Mark the
-  recommended option and let the user pick "Other" for anything bespoke.
-- **Use plain text** only for genuinely open-ended questions (the one-line pitch, naming a concept).
+- **Always imply options. Prefer `AskUserQuestion` over open text** — even for semi-open questions.
+  Don't ask "Any must-nots?" as prose; ask it as a **multi-select** with concrete pre-filled options
+  (e.g. *No accounts/login*, *No network multiplayer*, *No frameworks*, *No build step*, *No
+  telemetry*) plus "Other". Same for target user, constraints, stack, scaffold depth, first feature.
+  Every question carries a marked recommendation (except in Manual mode).
+- Populate options from sensible defaults for this kind of project — give the user something to
+  react to, not a blank page. "Other" always covers the bespoke case.
+- **Plain text only for the genuinely free-form** (the one-line pitch, naming a concept) — and even
+  then, offer a drafted suggestion they can accept or edit.
 - One question (or one `AskUserQuestion` batch) at a time. Don't stack unrelated asks.
 
 ## Phase 1 · Product  (writes docs/product/*)

@@ -45,6 +45,11 @@ Just before Claude opens, the launcher shows a short overview of what's about to
 interview phases) and asks **which model** to run the interview with — Opus (recommended), Sonnet,
 or your Claude Code default. Pass `--model <name>` to skip that prompt.
 
+Once inside, Claude first asks **how you want to be guided** — *Fast-track* (it picks sensible
+defaults, stops only at big forks), *Guide me* (every question offers options with a recommendation),
+or *Manual* (full control) — then walks the three phases. Questions come as selectable lists with
+pre-filled options and a marked recommendation, so you're never answering from a blank page.
+
 The new project is created as a sibling folder in your current directory (like `git clone`), **not**
 inside the tool repo. `new-project` copies `template/` into it, runs `git init` with a pristine
 commit, makes scripts/hooks executable, seeds local settings, injects the transient interview skill,
