@@ -28,8 +28,10 @@ cd create-claude-product
 ./install.sh          # symlinks `new-project` into ~/.local/bin
 ```
 
-`install.sh` tells you if that directory isn't on your PATH yet and prints the one line to add.
-Prefer not to install? Skip this step and call the launcher by its full path instead — e.g.
+`install.sh` tells you if that directory isn't on your PATH yet and prints the one line to add. If
+[`gum`](https://github.com/charmbracelet/gum) isn't installed, it offers to install it (via Homebrew)
+for an arrow-key model picker — say no and the plain numbered picker is used instead. Prefer not to
+install at all? Skip this step and call the launcher by its full path — e.g.
 `~/create-claude-product/bin/new-project my-app`.
 
 **Step 3 — Create a project.** From the directory where you want the new project to live:

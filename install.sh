@@ -53,8 +53,29 @@ case ":$PATH:" in
     ;;
 esac
 
-# Optional: nudge toward gum for a nicer model picker (only when it's missing).
+# gum powers the arrow-key model picker. Offer to install it when it's missing.
+# Runs after linking, and never aborts the install if it fails.
 if ! command -v gum >/dev/null 2>&1; then
   echo
-  echo "  Tip: install \`gum\` (brew install gum) for an arrow-key model picker."
+  if command -v brew >/dev/null 2>&1; then
+    do_install=1
+    if [ -t 0 ]; then
+      printf "  Install \`gum\` now for an arrow-key model picker? [Y/n] "
+      read -r ans || ans=""
+      case "$ans" in [Nn]*) do_install=0 ;; esac
+    fi
+    if [ "$do_install" -eq 1 ]; then
+      echo "  Installing gum (brew install gum)…"
+      if brew install gum; then
+        echo "  gum installed — the model picker will use an arrow-key list."
+      else
+        echo "  gum install failed; the plain numbered picker still works. Retry: brew install gum" >&2
+      fi
+    else
+      echo "  Skipped. Install later with: brew install gum"
+    fi
+  else
+    echo "  For an arrow-key model picker, install gum:"
+    echo "      https://github.com/charmbracelet/gum#installation"
+  fi
 fi
