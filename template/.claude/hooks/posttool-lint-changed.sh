@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# PostToolUse hook (matcher: Write|Edit) — lint the just-changed file and surface issues.
+# PostToolUse hook (matcher: Write|Edit) — lint the just-changed file.
 #
-# Runs a fast, single-file lint. Lint findings are SURFACED to Claude (printed) but do
-# NOT hard-fail the turn — we exit 0 so the model can read and decide. Make it blocking
-# only if your team really wants that (exit 2), but prefer surfacing over blocking here.
+# Runs a fast, single-file lint and prints findings to the transcript. Note: on exit 0,
+# a PostToolUse hook's stderr shows in the session/transcript but is NOT fed back into
+# the model's context — only exit 2 does that. We stay non-blocking on purpose: lint
+# noise shouldn't halt every edit, and stop-verify.sh is the real gate before a turn ends.
+# Flip to exit 2 if you want lint to actively block AND be surfaced to the model.
 # No-ops if no linter is installed (stack-tolerant).
 #
 # TODO: wire the linters your project uses. Keep them fast and scoped to one file.

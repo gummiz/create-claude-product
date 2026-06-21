@@ -1,11 +1,37 @@
 # create-claude-product
 
-A one-command bootstrapper for the Claude Code product template. It scaffolds a new project and
-then runs a guided interview that fills the product docs, picks and records a stack, and seeds the
-first spec — leaving you with a ready-to-implement first feature.
+The **Claude Code product template** — a small, opinionated, stack-agnostic starting point for
+building digital products end-to-end with Claude Code — bundled with a one-command installer that
+stamps it into a new project and runs a guided setup interview.
 
-This is the **tool**. The template it stamps out lives in [`template/`](template/). The original
-[`claude-code-template`](../claude-code-template) repo is kept frozen as a manual `cp -R` fallback.
+The template is the point. `new-project` is just the handy way to stamp it out and fill it in; you
+can always copy [`template/`](template/) by hand instead.
+
+## What you get — the template
+
+The template optimizes for four things: **consistency** across projects, **low token usage**,
+**strong verification**, and **safe autonomy**. It works for frontend-heavy, backend-heavy, and
+mixed work, and is deliberately small — prune what you don't use.
+
+| Piece | Where (in a generated project) | Purpose |
+|---|---|---|
+| **Operating guide** | `CLAUDE.md` | Short, high-signal rules always in context (kept under ~120 lines). |
+| **Docs (source of truth)** | `docs/` | Product intent, architecture, and workflows — read on demand. |
+| **Hooks** | `.claude/hooks/` | Deterministic guardrails that run *every time*: block dangerous bash, protect sensitive paths, format/lint changed files, verify on stop. |
+| **Agents** | `.claude/agents/` | Few, specialized: `researcher`, `implementer`, `reviewer`, `qa`. |
+| **Skills** | `.claude/skills/` | On-demand how-to: `spec-writing`, `repo-conventions`, `testing`, `ui`, `api`, `release`. |
+| **Scripts** | `scripts/` | Deterministic work: `verify`, `lint-changed`, `test-changed`, `sandbox-preflight`, `review-diff`. |
+| **Spec scaffold** | `template/new-spec/` | Starting point for spec-driven feature work. |
+
+**The philosophy (how the pieces divide labor):** `CLAUDE.md` holds what's true *every* session;
+**skills** carry detailed how-to loaded *only when relevant* (cheap context); **hooks** enforce what
+must happen *automatically and deterministically*; **scripts** capture deterministic work once;
+**agents** give isolated context for research/build/review/QA; **sandboxing** scales isolation to how
+much autonomy a task needs. Work flows **product → architecture → spec → code**, in small verified
+batches.
+
+Full template docs live in [`template/README.md`](template/README.md) and ship inside every project
+you create.
 
 ## Prerequisites
 
@@ -60,13 +86,21 @@ fills the docs, records a stack, and seeds your first spec, then removes its own
 
 ## How it works
 
-| Piece | Role |
-|---|---|
-| `install.sh` / `uninstall.sh` | Add or remove the `new-project` symlink on your PATH. |
-| `bin/new-project` | Deterministic launcher: copy `template/` → child, git init, inject the interview skill, launch Claude. Resolves its own location through symlinks, so the PATH install works. |
-| `template/` | The payload — a copy of the Claude Code product template. Only its contents reach a generated project. |
-| `.claude/skills/project-bootstrap/` | The interview skill, injected transiently into each new project and removed when bootstrap completes. |
-| `tests/` | Launcher smoke test. |
+This repo has two layers: **the payload that ships** and **the tooling that builds/installs it**.
+Only `template/` (plus the transiently-injected interview skill) ever reaches a generated project —
+everything else is tool-only and never copied out.
+
+| Piece | Layer | Role |
+|---|---|---|
+| `template/` | **ships** | The payload — the Claude Code product template. Only its contents reach a generated project. |
+| `.claude/skills/project-bootstrap/` | **ships (transient)** | The interview skill, injected into each new project and removed when bootstrap completes. |
+| `bin/new-project` | tooling | Deterministic launcher: copy `template/` → child, git init, inject the skill, launch Claude. Resolves its own location through symlinks so the PATH install works. |
+| `install.sh` / `uninstall.sh` | tooling | Add or remove the `new-project` symlink on your PATH. |
+| `tests/` | tooling | Launcher smoke test — proves the scaffold is correct and that no tool-only file leaks into a child. |
+| `docs/superpowers/` | tooling | This tool's own design spec + implementation plan (how it was built). Never shipped. |
+
+That separation is enforced, not just documented: `template/` is an explicit allowlist (a child gets
+exactly `cp -R template/`), and the smoke test asserts none of the tooling leaks in.
 
 ## Uninstall
 
