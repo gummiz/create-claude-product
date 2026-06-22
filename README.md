@@ -121,3 +121,7 @@ repo folder. Uninstalling does nothing to projects already generated — they're
 - The interview is phased and resumable; every phase boundary is a clean, valid exit point.
 
 Full rationale: [`docs/superpowers/specs/2026-06-21-new-project-bootstrapper-design.md`](docs/superpowers/specs/2026-06-21-new-project-bootstrapper-design.md).
+
+## License
+
+[MIT](LICENSE) — use, modify, and redistribute freely with attribution.
